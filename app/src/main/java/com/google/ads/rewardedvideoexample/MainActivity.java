@@ -244,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
 
           @Override
           public void onFinish() {
-            if (rewardedAd != null) {
+            if (adsCache.availableAdsCount(AD_UNIT_ID) > 0) {
               showVideoButton.setVisibility(View.VISIBLE);
             }
             textView.setText("You Lose!");
