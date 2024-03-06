@@ -184,35 +184,6 @@ public class MainActivity extends AppCompatActivity {
     gamePaused = false;
   }
 
-  private void loadRewardedAd() {
-    if (rewardedAd == null) {
-      isLoading = true;
-      AdRequest adRequest = new AdRequest.Builder().build();
-      RewardedAd.load(
-          this,
-          AD_UNIT_ID,
-          adRequest,
-          new RewardedAdLoadCallback() {
-            @Override
-            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-              // Handle the error.
-              Log.d(TAG, loadAdError.getMessage());
-              rewardedAd = null;
-              MainActivity.this.isLoading = false;
-              Toast.makeText(MainActivity.this, "onAdFailedToLoad", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
-              MainActivity.this.rewardedAd = rewardedAd;
-              Log.d(TAG, "onAdLoaded");
-              MainActivity.this.isLoading = false;
-              Toast.makeText(MainActivity.this, "onAdLoaded", Toast.LENGTH_SHORT).show();
-            }
-          });
-    }
-  }
-
   private void addCoins(int coins) {
     coinCount += coins;
     coinCountText.setText("Coins: " + coinCount);
@@ -256,63 +227,6 @@ public class MainActivity extends AppCompatActivity {
     countDownTimer.start();
   }
 
-  private void showRewardedVideo() {
-    if (rewardedAd == null) {
-      Log.d("TAG", "The rewarded ad wasn't ready yet.");
-      return;
-    }
-    showVideoButton.setVisibility(View.INVISIBLE);
-
-    rewardedAd.setFullScreenContentCallback(
-        new FullScreenContentCallback() {
-          @Override
-          public void onAdShowedFullScreenContent() {
-            // Called when ad is shown.
-            Log.d(TAG, "onAdShowedFullScreenContent");
-            Toast.makeText(MainActivity.this, "onAdShowedFullScreenContent", Toast.LENGTH_SHORT)
-                .show();
-          }
-
-          @Override
-          public void onAdFailedToShowFullScreenContent(AdError adError) {
-            // Called when ad fails to show.
-            Log.d(TAG, "onAdFailedToShowFullScreenContent");
-            // Don't forget to set the ad reference to null so you
-            // don't show the ad a second time.
-            rewardedAd = null;
-            Toast.makeText(
-                    MainActivity.this, "onAdFailedToShowFullScreenContent", Toast.LENGTH_SHORT)
-                .show();
-          }
-
-          @Override
-          public void onAdDismissedFullScreenContent() {
-            // Called when ad is dismissed.
-            // Don't forget to set the ad reference to null so you
-            // don't show the ad a second time.
-            rewardedAd = null;
-            Log.d(TAG, "onAdDismissedFullScreenContent");
-            Toast.makeText(MainActivity.this, "onAdDismissedFullScreenContent", Toast.LENGTH_SHORT)
-                .show();
-            if (googleMobileAdsConsentManager.canRequestAds()) {
-              // Preload the next rewarded ad.
-              MainActivity.this.loadRewardedAd();
-            }
-          }
-        });
-    Activity activityContext = MainActivity.this;
-    rewardedAd.show(
-        activityContext,
-        new OnUserEarnedRewardListener() {
-          @Override
-          public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
-            // Handle the reward.
-            Log.d("TAG", "The user earned the reward.");
-            addCoins(coinCount);
-          }
-        });
-  }
-
     public void showRewardedAdsCache(View view) {
         this.adsCache.showAd(AD_UNIT_ID, MainActivity.this, new
                 AdsCacheCallback() {
@@ -348,22 +262,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
-
-  private void initializeMobileAdsSdk() {
-    if (isMobileAdsInitializeCalled.getAndSet(true)) {
-      return;
-    }
-
-    // Initialize the Mobile Ads SDK.
-    MobileAds.initialize(this, new OnInitializationCompleteListener() {
-      @Override
-      public void onInitializationComplete(InitializationStatus initializationStatus) {
-      }
-    });
-
-    // Load an ad.
-    loadRewardedAd();
-  }
 
   private void initializeAdsCache(){
       this.adsCache = new AdsCache(getApplicationContext(), new AdsQueueCallback() {
